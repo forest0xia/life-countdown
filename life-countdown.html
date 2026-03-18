@@ -378,6 +378,31 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 }
 .dc-dot.active{width:24px;border-radius:4px;background:rgba(255,255,255,.7)}
 
+/* Page 2: Life Grid */
+.dc-grid-title{
+  font-family:'Outfit',sans-serif;font-size:clamp(.7rem,1.5vw,.85rem);
+  color:var(--text3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:20px;
+}
+.dc-grid{
+  display:grid;gap:clamp(3px,0.8vw,6px);
+  width:fit-content;max-width:90vw;
+}
+.dc-grid-cell{
+  width:clamp(16px,3.5vw,32px);height:clamp(16px,3.5vw,32px);
+  border-radius:4px;transition:all .3s ease;
+}
+.dc-grid-cell.lived{opacity:.7}
+.dc-grid-cell.current{
+  background:#fff !important;
+  box-shadow:0 0 10px #fff,0 0 20px var(--red-glow);
+  animation:dotP 2s infinite;
+}
+.dc-grid-cell.future{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06)}
+.dc-grid-info{
+  font-family:'DM Mono',monospace;font-size:clamp(.75rem,1.8vw,.95rem);
+  color:var(--text3);margin-top:20px;letter-spacing:.04em;
+}
+
 /* btn in top bar */
 /* btn-clock now uses .btn-icon */
 
@@ -891,6 +916,7 @@ function openDeskClock(){
   // check orientation for hint
   checkDcOrientation();
   initDcPages();
+  buildLifeGrid();
   updateDeskClock();
   dcInterval=setInterval(updateDeskClock,1000);
   // rotate quotes
@@ -1068,6 +1094,51 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
+// === PAGE 2: LIFE GRID ===
+function buildLifeGrid(){
+  const grid=document.getElementById('dcGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  const totalYears=Math.ceil(le);
+  const cols=10;
+  grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  for(let i=0;i<totalYears;i++){
+    const cell=document.createElement('div');
+    cell.className='dc-grid-cell';
+    cell.dataset.year=i;
+    grid.appendChild(cell);
+  }
+  updateLifeGrid();
+}
+
+function updateLifeGrid(){
+  const grid=document.getElementById('dcGrid');
+  if(!grid)return;
+  const age=ageX();
+  const livedYears=Math.floor(age);
+  const totalYears=Math.ceil(le);
+  const cells=grid.querySelectorAll('.dc-grid-cell');
+  cells.forEach((cell,i)=>{
+    cell.classList.remove('lived','current','future');
+    if(i<livedYears){
+      cell.classList.add('lived');
+      // Gradient: early years cool (#60a5fa), recent years warm (#ff3b5c)
+      const t=i/Math.max(livedYears-1,1);
+      const r=Math.round(96+(255-96)*t);
+      const g=Math.round(165+(59-165)*t);
+      const b=Math.round(250+(92-250)*t);
+      cell.style.background=`rgb(${r},${g},${b})`;
+    }else if(i===livedYears){
+      cell.classList.add('current');
+    }else{
+      cell.classList.add('future');
+      cell.style.background='';
+    }
+  });
+  const info=document.getElementById('dcGridInfo');
+  if(info)info.textContent=`已度过 ${livedYears} 年 · 剩余 ${Math.max(totalYears-livedYears-1,0)} 年`;
+}
+
 function updateDeskClock(){
   const now=new Date();
   const days=['日','一','二','三','四','五','六'];
@@ -1097,6 +1168,8 @@ function updateDeskClock(){
   const rem=Math.max(le-age,0);
   const freeYears=(rem*(freeH()/24)).toFixed(1);
   document.getElementById('dcFree').textContent=freeYears+' 年';
+  // Update active page content
+  if(dcCurrentPage===1)updateLifeGrid();
 }
 
 // ===== SCROLL SECTION TRACKING =====
