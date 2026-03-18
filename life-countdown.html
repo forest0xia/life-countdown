@@ -334,6 +334,8 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .dc-bar-wrap{max-width:min(60vw,450px)}
   .dc-quote{font-size:clamp(.75rem,1.6vh,.95rem);max-width:min(60vw,420px)}
   .dc-rotate-hint{display:none !important}
+  .dc-grid-cell{width:clamp(14px,2.5vh,28px);height:clamp(14px,2.5vh,28px)}
+  .dc-page-hourglass canvas{width:min(35vw,280px);height:min(70vh,450px)}
 }
 /* iPad landscape */
 @media(min-width:768px) and (orientation:landscape){
@@ -1005,12 +1007,16 @@ window.addEventListener('resize',()=>{
     checkDcOrientation();
     resizeHgCanvas();
     if(hgParticles.geo)hgParticles.geo=null;
+    resizeRingsCanvas();
   }
 });
 if(screen.orientation){
   screen.orientation.addEventListener('change',()=>{
     if(document.getElementById('deskClock').classList.contains('open')){
       checkDcOrientation();
+      resizeHgCanvas();
+      if(hgParticles.geo)hgParticles.geo=null;
+      resizeRingsCanvas();
     }
   });
 }
@@ -1023,6 +1029,9 @@ function showDcQuote(){
 
 function closeDeskClock(){
   stopHintCountdown();
+  if(hgAnimId){cancelAnimationFrame(hgAnimId);hgAnimId=null;}
+  hgLastTime=0;
+  if(dcPageObserver){dcPageObserver.disconnect();dcPageObserver=null;}
   const el=document.getElementById('deskClock');
   el.classList.remove('open');
   document.getElementById('ticker').classList.add('visible');
@@ -1088,6 +1097,7 @@ function initDcPages(){
         if(idx>=0&&idx!==dcCurrentPage){
           dcCurrentPage=idx;
           updateDcDots(idx);
+          if(idx===2&&!hgAnimId)hgAnimate(performance.now());
         }
       }
     });
