@@ -367,6 +367,17 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .dc-rotate-hint{display:flex}
 }
 
+/* Page indicator dots */
+.dc-dots{
+  position:absolute;bottom:max(16px,env(safe-area-inset-bottom,16px));left:0;right:0;
+  display:flex;justify-content:center;gap:10px;z-index:3;pointer-events:auto;
+}
+.dc-dot{
+  width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);
+  cursor:pointer;transition:all .3s ease;
+}
+.dc-dot.active{width:24px;border-radius:4px;background:rgba(255,255,255,.7)}
+
 /* btn in top bar */
 /* btn-clock now uses .btn-icon */
 
@@ -879,6 +890,7 @@ function openDeskClock(){
   try{if(navigator.wakeLock)navigator.wakeLock.request('screen').then(l=>{el._wakeLock=l})}catch(e){}
   // check orientation for hint
   checkDcOrientation();
+  initDcPages();
   updateDeskClock();
   dcInterval=setInterval(updateDeskClock,1000);
   // rotate quotes
@@ -988,11 +1000,71 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
     // 4) If rotate hint is visible, ignore taps on it (don't cycle quotes)
     if(e.target.closest('.dc-rotate-hint:not(.hidden)'))return;
-    // 5) Tap anywhere else = cycle quote
-    dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;
-    showDcQuote();
-    clearInterval(dcQuoteTimer);
-    dcQuoteTimer=setInterval(()=>{dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;showDcQuote()},8000);
+    // 5) Tap on Page 1 only = cycle quote
+    if(dcCurrentPage===0){
+      dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;
+      showDcQuote();
+      clearInterval(dcQuoteTimer);
+      dcQuoteTimer=setInterval(()=>{dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;showDcQuote()},8000);
+    }
+  });
+});
+
+// === PAGE NAVIGATION ===
+let dcCurrentPage=0;
+let dcPageObserver=null;
+
+function initDcPages(){
+  const container=document.getElementById('dcPages');
+  if(!container)return;
+  // Reset to page 1
+  container.scrollLeft=0;
+  dcCurrentPage=0;
+  updateDcDots(0);
+
+  // IntersectionObserver to track visible page
+  if(dcPageObserver)dcPageObserver.disconnect();
+  const pages=container.querySelectorAll('.dc-page');
+  dcPageObserver=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting&&e.intersectionRatio>=0.5){
+        const idx=[...pages].indexOf(e.target);
+        if(idx>=0&&idx!==dcCurrentPage){
+          dcCurrentPage=idx;
+          updateDcDots(idx);
+        }
+      }
+    });
+  },{root:container,threshold:0.5});
+  pages.forEach(p=>dcPageObserver.observe(p));
+}
+
+function updateDcDots(idx){
+  document.querySelectorAll('.dc-dot').forEach((d,i)=>{
+    d.classList.toggle('active',i===idx);
+  });
+}
+
+function goToDcPage(idx){
+  const container=document.getElementById('dcPages');
+  if(!container)return;
+  const pages=container.querySelectorAll('.dc-page');
+  if(pages[idx])pages[idx].scrollIntoView({behavior:'smooth',block:'nearest',inline:'start'});
+}
+
+// Dot click handlers
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.dc-dot').forEach(dot=>{
+    dot.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      goToDcPage(parseInt(dot.dataset.page));
+    });
+  });
+  // Arrow key navigation
+  document.addEventListener('keydown',(e)=>{
+    if(!document.getElementById('deskClock').classList.contains('open'))return;
+    if(e.key==='ArrowRight')goToDcPage(Math.min(dcCurrentPage+1,3));
+    else if(e.key==='ArrowLeft')goToDcPage(Math.max(dcCurrentPage-1,0));
   });
 });
 
