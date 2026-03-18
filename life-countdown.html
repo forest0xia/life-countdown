@@ -413,6 +413,22 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   color:var(--text3);margin-top:16px;letter-spacing:.04em;text-align:center;
 }
 
+/* Page 4: Time Rings */
+.dc-page-rings{position:relative}
+.dc-page-rings canvas{display:block;margin:0 auto}
+.dc-rings-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;pointer-events:none;
+}
+.dc-rings-center .rings-free-label{
+  font-size:clamp(.6rem,1.4vw,.75rem);color:var(--green);
+  letter-spacing:.1em;margin-bottom:4px;
+}
+.dc-rings-center .rings-free-val{
+  font-family:'DM Mono',monospace;font-size:clamp(1rem,3vw,1.5rem);
+  font-weight:700;color:var(--green);
+}
+
 /* btn in top bar */
 /* btn-clock now uses .btn-icon */
 
@@ -928,6 +944,7 @@ function openDeskClock(){
   initDcPages();
   buildLifeGrid();
   initHourglass();
+  resizeRingsCanvas();
   updateDeskClock();
   dcInterval=setInterval(updateDeskClock,1000);
   // rotate quotes
@@ -1338,6 +1355,112 @@ function updateHgInfo(){
   info.textContent=`剩余 ${ry} 年 ${rd} 天`;
 }
 
+// === PAGE 4: TIME ALLOCATION RINGS ===
+function resizeRingsCanvas(){
+  const canvas=document.getElementById('ringsCanvas');
+  if(!canvas)return;
+  const parent=canvas.parentElement;
+  const size=Math.min(parent.clientWidth*0.85,parent.clientHeight*0.7,400);
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=size*dpr;
+  canvas.height=size*dpr;
+  canvas.style.width=size+'px';
+  canvas.style.height=size+'px';
+}
+
+function drawRings(){
+  const canvas=document.getElementById('ringsCanvas');
+  if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const size=canvas.width/dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.scale(dpr,dpr);
+
+  const cx=size/2, cy=size/2;
+  const maxR=size*0.46;
+  const age=ageX();
+  const remYears=Math.max(le-age,0);
+  const remHours=remYears*365.25*24;
+
+  // Build ring data: each ring subtracts an activity
+  const rings=[];
+  let hoursLeft=remHours;
+
+  // Ring 0: total remaining (outermost)
+  rings.push({label:'总剩余',icon:'⏱',hours:hoursLeft,color:'rgba(255,255,255,.25)',deduct:0});
+
+  // Subtract each ALLOC category
+  ALLOC.forEach(a=>{
+    const deducted=remYears*365.25*a.h;
+    hoursLeft-=deducted;
+    rings.push({label:a.label,icon:a.icon,hours:Math.max(hoursLeft,0),color:a.color,deduct:a.h});
+  });
+
+  // Innermost ring: true free time (distinct green ring)
+  rings.push({label:'真正自由',icon:'✨',hours:Math.max(hoursLeft,0),color:'#34d399',deduct:0});
+
+  const totalRings=rings.length;
+  const ringWidth=Math.min(maxR/(totalRings+1),18);
+  const ringGap=2;
+
+  // Draw from outer to inner
+  rings.forEach((ring,i)=>{
+    const r=maxR-i*(ringWidth+ringGap);
+    if(r<=0)return;
+    const fraction=ring.hours/remHours;
+    const arcEnd=-Math.PI/2+fraction*Math.PI*2;
+
+    // Background track
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,.04)';
+    ctx.lineWidth=ringWidth;
+    ctx.stroke();
+
+    // Filled arc
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,-Math.PI/2,arcEnd);
+    ctx.strokeStyle=ring.color;
+    ctx.lineWidth=ringWidth-1;
+    ctx.lineCap='round';
+    ctx.stroke();
+
+    // Label at the end of the arc (skip outermost and innermost free-time ring)
+    if(i>0&&i<totalRings-1&&r>30){
+      const labelAngle=arcEnd+0.08;
+      const lx=cx+Math.cos(labelAngle)*(r+ringWidth/2+10);
+      const ly=cy+Math.sin(labelAngle)*(r+ringWidth/2+10);
+      ctx.fillStyle='rgba(255,255,255,.35)';
+      ctx.font=`${Math.max(9,ringWidth*0.65)}px "Noto Sans SC",sans-serif`;
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.fillText(`${ring.icon} -${ring.deduct}h`,lx,ly);
+    }
+  });
+
+  ctx.restore();
+
+  // Update center countdown
+  updateRingsCenter();
+}
+
+function updateRingsCenter(){
+  const el=document.getElementById('dcRingsCenter');
+  if(!el)return;
+  const age=ageX();
+  const remYears=Math.max(le-age,0);
+  const freeYears=remYears*(freeH()/24);
+  const freeDays=freeYears*365.25;
+  const freeSeconds=freeDays*86400;
+  const d=Math.floor(freeDays);
+  const h=Math.floor((freeSeconds%86400)/3600);
+  const m=Math.floor((freeSeconds%3600)/60);
+  const s=Math.floor(freeSeconds%60);
+  el.innerHTML=`<div class="rings-free-label">真正自由的时间</div><div class="rings-free-val">${d}天 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</div>`;
+}
+
 function updateDeskClock(){
   const now=new Date();
   const days=['日','一','二','三','四','五','六'];
@@ -1373,6 +1496,7 @@ function updateDeskClock(){
     updateHgInfo();
     if(!hgAnimId)hgAnimate(performance.now());
   }
+  if(dcCurrentPage===3)drawRings();
 }
 
 // ===== SCROLL SECTION TRACKING =====
