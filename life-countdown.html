@@ -403,6 +403,16 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   color:var(--text3);margin-top:20px;letter-spacing:.04em;
 }
 
+/* Page 3: Hourglass */
+.dc-page-hourglass canvas{
+  width:min(60vw,300px);height:min(80vh,500px);
+  display:block;margin:0 auto;
+}
+.dc-hg-info{
+  font-family:'DM Mono',monospace;font-size:clamp(.8rem,2vw,1rem);
+  color:var(--text3);margin-top:16px;letter-spacing:.04em;text-align:center;
+}
+
 /* btn in top bar */
 /* btn-clock now uses .btn-icon */
 
@@ -917,6 +927,7 @@ function openDeskClock(){
   checkDcOrientation();
   initDcPages();
   buildLifeGrid();
+  initHourglass();
   updateDeskClock();
   dcInterval=setInterval(updateDeskClock,1000);
   // rotate quotes
@@ -975,6 +986,8 @@ function dismissRotateHint(e){
 window.addEventListener('resize',()=>{
   if(document.getElementById('deskClock').classList.contains('open')){
     checkDcOrientation();
+    resizeHgCanvas();
+    if(hgParticles.geo)hgParticles.geo=null;
   }
 });
 if(screen.orientation){
@@ -1139,6 +1152,192 @@ function updateLifeGrid(){
   if(info)info.textContent=`已度过 ${livedYears} 年 · 剩余 ${Math.max(totalYears-livedYears-1,0)} 年`;
 }
 
+// === PAGE 3: HOURGLASS ===
+let hgParticles=[];
+let hgAnimId=null;
+
+function initHourglass(){
+  const canvas=document.getElementById('hourglassCanvas');
+  if(!canvas)return;
+  resizeHgCanvas();
+  hgParticles=[];
+  initHgParticles();
+  if(!hgAnimId)hgAnimate();
+}
+
+function resizeHgCanvas(){
+  const canvas=document.getElementById('hourglassCanvas');
+  if(!canvas)return;
+  const parent=canvas.parentElement;
+  const w=Math.min(parent.clientWidth*0.6,300);
+  const h=Math.min(parent.clientHeight*0.75,500);
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=w*dpr;
+  canvas.height=h*dpr;
+  canvas.style.width=w+'px';
+  canvas.style.height=h+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+}
+
+function drawHourglass(ctx,w,h){
+  const cx=w/2;
+  const topY=h*0.05, botY=h*0.95, midY=h*0.5;
+  const neckW=6, bodyW=w*0.38;
+  const capH=h*0.03;
+
+  // Glass body outline
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,.25)';
+  ctx.lineWidth=1.5;
+  ctx.beginPath();
+  // Upper body: wide at top, narrow at middle
+  ctx.moveTo(cx-bodyW,topY+capH);
+  ctx.bezierCurveTo(cx-bodyW,midY-20, cx-neckW,midY-10, cx-neckW,midY);
+  ctx.lineTo(cx+neckW,midY);
+  ctx.bezierCurveTo(cx+neckW,midY-10, cx+bodyW,midY-20, cx+bodyW,topY+capH);
+  ctx.stroke();
+  ctx.beginPath();
+  // Lower body: narrow at middle, wide at bottom
+  ctx.moveTo(cx-neckW,midY);
+  ctx.bezierCurveTo(cx-neckW,midY+10, cx-bodyW,midY+20, cx-bodyW,botY-capH);
+  ctx.lineTo(cx+bodyW,botY-capH);
+  ctx.bezierCurveTo(cx+bodyW,midY+20, cx+neckW,midY+10, cx+neckW,midY);
+  ctx.stroke();
+
+  // Top and bottom caps
+  ctx.fillStyle='rgba(255,255,255,.15)';
+  ctx.fillRect(cx-bodyW-4,topY,bodyW*2+8,capH);
+  ctx.fillRect(cx-bodyW-4,botY-capH,bodyW*2+8,capH);
+
+  // Glass sheen highlight
+  ctx.beginPath();
+  ctx.strokeStyle='rgba(255,255,255,.08)';
+  ctx.lineWidth=3;
+  ctx.moveTo(cx-bodyW+8,topY+capH+10);
+  ctx.bezierCurveTo(cx-bodyW+8,midY-30, cx-neckW-2,midY-15, cx-neckW-2,midY);
+  ctx.stroke();
+  ctx.restore();
+
+  // Return geometry for particle bounds
+  return {cx,topY:topY+capH,botY:botY-capH,midY,neckW,bodyW};
+}
+
+function getHgWidth(geo,y){
+  // Returns the half-width of the hourglass at a given y
+  const {cx,topY,botY,midY,neckW,bodyW}=geo;
+  if(y<=topY)return bodyW;
+  if(y>=botY)return bodyW;
+  if(y<midY){
+    const t=(y-topY)/(midY-topY);
+    return bodyW+(neckW-bodyW)*Math.pow(t,0.6);
+  }else{
+    const t=(y-midY)/(botY-midY);
+    return neckW+(bodyW-neckW)*Math.pow(t,0.6);
+  }
+}
+
+function initHgParticles(){
+  hgParticles=[];
+  const totalP=180;
+  const age=ageX();
+  const pct=Math.min(age/le,1);
+  const upperCount=Math.round(totalP*(1-pct));
+  const lowerCount=totalP-upperCount;
+  hgParticles={upper:[],lower:[],falling:[],upperCount,lowerCount,geo:null};
+}
+
+function placeHgParticles(geo){
+  const {cx,topY,botY,midY,neckW,bodyW}=geo;
+  const p=hgParticles;
+  p.geo=geo;
+  p.upper=[];p.lower=[];p.falling=[];
+
+  for(let i=0;i<p.upperCount;i++){
+    const y=midY-4-Math.random()*(midY-topY-10);
+    const hw=getHgWidth(geo,y)*0.85;
+    const x=cx+(Math.random()*2-1)*hw;
+    p.upper.push({x,y,r:1.5+Math.random()*1.2});
+  }
+  for(let i=0;i<p.lowerCount;i++){
+    const y=botY-2-Math.random()*(botY-midY-10);
+    const hw=getHgWidth(geo,y)*0.85;
+    const x=cx+(Math.random()*2-1)*hw;
+    p.lower.push({x,y,r:1.5+Math.random()*1.2});
+  }
+}
+
+function updateHgParticles(dt){
+  const p=hgParticles;
+  if(!p.geo)return;
+  const {cx,midY,botY,neckW}=p.geo;
+  const g=300;
+
+  if(p.falling.length<2&&p.upper.length>0&&Math.random()<0.03){
+    p.upper.pop();
+    p.falling.push({x:cx+(Math.random()*2-1)*2,y:midY-8,vy:0,r:2});
+  }
+
+  for(let i=p.falling.length-1;i>=0;i--){
+    const f=p.falling[i];
+    f.vy+=g*dt;
+    f.y+=f.vy*dt;
+    if(f.y>=botY-4){
+      const hw=getHgWidth(p.geo,botY-6)*0.85;
+      p.lower.push({x:cx+(Math.random()*2-1)*hw,y:botY-2-Math.random()*8,r:f.r});
+      p.falling.splice(i,1);
+    }
+  }
+}
+
+function drawHgParticles(ctx){
+  const p=hgParticles;
+  if(!p.geo)return;
+  const sandColor='rgba(244,242,250,.6)';
+  ctx.fillStyle=sandColor;
+  [...p.upper,...p.lower,...p.falling].forEach(pt=>{
+    ctx.beginPath();
+    ctx.arc(pt.x,pt.y,pt.r,0,Math.PI*2);
+    ctx.fill();
+  });
+}
+
+let hgLastTime=0;
+function hgAnimate(ts){
+  if(!document.getElementById('deskClock').classList.contains('open')){
+    hgAnimId=null;return;
+  }
+  const dt=hgLastTime?Math.min((ts-hgLastTime)/1000,0.05):0.016;
+  hgLastTime=ts;
+
+  const canvas=document.getElementById('hourglassCanvas');
+  if(!canvas){hgAnimId=null;return;}
+  const dpr=window.devicePixelRatio||1;
+  const w=canvas.width/dpr, h=canvas.height/dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const geo=drawHourglass(ctx,w,h);
+  if(!hgParticles.geo)placeHgParticles(geo);
+  updateHgParticles(dt);
+  drawHgParticles(ctx);
+
+  if(dcCurrentPage===2){
+    hgAnimId=requestAnimationFrame(hgAnimate);
+  }else{
+    hgAnimId=null;
+  }
+}
+
+function updateHgInfo(){
+  const info=document.getElementById('dcHgInfo');
+  if(!info)return;
+  const r=remS();
+  const ry=Math.floor(r/(365.25*86400));
+  const rd=Math.floor((r-ry*365.25*86400)/86400);
+  info.textContent=`剩余 ${ry} 年 ${rd} 天`;
+}
+
 function updateDeskClock(){
   const now=new Date();
   const days=['日','一','二','三','四','五','六'];
@@ -1170,6 +1369,10 @@ function updateDeskClock(){
   document.getElementById('dcFree').textContent=freeYears+' 年';
   // Update active page content
   if(dcCurrentPage===1)updateLifeGrid();
+  if(dcCurrentPage===2){
+    updateHgInfo();
+    if(!hgAnimId)hgAnimate(performance.now());
+  }
 }
 
 // ===== SCROLL SECTION TRACKING =====
