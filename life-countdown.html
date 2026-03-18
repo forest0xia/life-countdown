@@ -94,6 +94,8 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 .life-bar-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
 .life-bar-title{font-size:.82rem;color:var(--text2);letter-spacing:.1em;font-weight:500}
 .life-bar-pct{font-family:'Outfit',sans-serif;font-size:2.2rem;font-weight:900;color:var(--red)}
+.life-bar-track{position:relative}
+.life-bar-rem{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:'DM Mono',monospace;font-size:.78rem;font-weight:500;color:var(--text3);white-space:nowrap;z-index:3}
 .life-bar-track{width:100%;height:44px;background:rgba(255,255,255,.05);border-radius:12px;overflow:hidden;position:relative}
 .life-bar-fill{height:100%;border-radius:12px;background:linear-gradient(90deg,rgba(255,59,92,.2) 0%,var(--red) 100%);width:0;transition:width 1.8s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
 .life-bar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:#fff;border-radius:2px;box-shadow:0 0 16px var(--red),0 0 40px var(--red-glow);animation:barGlow 1.5s ease-in-out infinite;z-index:2}
@@ -148,7 +150,8 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 .dot-matrix{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:100%}
 .dot{aspect-ratio:1;border-radius:3px;transition:all .3s}
 .dot.lived{background:var(--red);opacity:.65}
-.dot.current{background:#fff;box-shadow:0 0 10px #fff,0 0 20px var(--red-glow);animation:dotP 2s infinite}
+.dot.current{position:relative;background:rgba(255,255,255,.12);overflow:hidden;box-shadow:0 0 10px rgba(255,255,255,.5),0 0 20px var(--red-glow);animation:dotP 2s infinite}
+.dot.current::after{content:'';position:absolute;top:0;left:0;right:0;height:var(--yr-pct,0%);background:var(--red);opacity:.7}
 .dot.remaining{background:rgba(255,255,255,.12)}
 @keyframes dotP{0%,100%{box-shadow:0 0 10px #fff,0 0 20px var(--red-glow)}50%{box-shadow:0 0 4px #fff,0 0 8px var(--red-glow)}}
 .dot-legend{display:flex;justify-content:center;gap:20px;margin-top:14px;font-size:.74rem;color:var(--text2)}
@@ -525,7 +528,10 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
     <div id="life-bar" class="life-bar-section anim-rise d3 section-wrap" data-section="life-bar">
       <div class="glass-strong">
         <div class="life-bar-header"><span class="life-bar-title">生命已消耗</span><span class="life-bar-pct" id="lifePct">0%</span></div>
-        <div class="life-bar-track"><div class="life-bar-fill" id="lifeBarFill"></div></div>
+        <div class="life-bar-track">
+          <div class="life-bar-fill" id="lifeBarFill"></div>
+          <div class="life-bar-rem" id="lifeRemPct">剩余 0%</div>
+        </div>
         <div class="life-bar-footer">
           <div class="life-bar-labels"><span>出生</span><span>&nbsp;→&nbsp;</span><span id="leLabel">79 岁</span></div>
           <button class="le-edit-btn" onclick="openModal()">
@@ -542,8 +548,8 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
         <div class="dot-matrix" id="dotMatrix"></div>
         <div class="dot-legend">
           <span><i style="background:var(--red);opacity:.65"></i>已度过</span>
-          <span><i style="background:#fff;box-shadow:0 0 6px #fff;display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px"></i>此刻</span>
-          <span><i style="background:rgba(255,255,255,.12);display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px"></i>剩余</span>
+          <span><i style="position:relative;overflow:hidden;background:rgba(255,255,255,.12)"><em style="position:absolute;top:0;left:0;right:0;height:50%;background:var(--red);opacity:.7;border-radius:3px 3px 0 0"></em></i>今年</span>
+          <span><i style="background:rgba(255,255,255,.12)"></i>剩余</span>
         </div>
       </div>
     </div>
@@ -841,6 +847,7 @@ function renderAll(){
   const age=ageX(),pct=Math.min(age/le*100,100),rem=Math.max(le-age,0);
   updateHero(age);
   document.getElementById('lifePct').textContent=pct.toFixed(2)+'%';
+  document.getElementById('lifeRemPct').textContent='剩余 '+Math.max(100-pct,0).toFixed(2)+'%';
   document.getElementById('leLabel').textContent=le+' 岁';
   requestAnimationFrame(()=>{document.getElementById('lifeBarFill').style.width=pct+'%'});
   renderDots(age);renderCards(rem);renderAlloc(rem);renderProg();renderQuote(pct);
@@ -848,7 +855,7 @@ function renderAll(){
   setTimeout(()=>{document.querySelectorAll('.pg-fill[data-w]').forEach(el=>{el.style.width=el.dataset.w})},200);
 }
 function updateHero(age){const i=Math.floor(age),d=(age-i).toFixed(6).slice(1);document.getElementById('heroAge').innerHTML=`${i}<span class="hero-decimal">${d}</span>`}
-function renderDots(age){const c=document.getElementById('dotMatrix');c.innerHTML='';const t=Math.ceil(le),l=Math.floor(age);for(let i=0;i<t;i++){const d=document.createElement('div');d.className='dot '+(i<l?'lived':i===l?'current':'remaining');c.appendChild(d)}}
+function renderDots(age){const c=document.getElementById('dotMatrix');c.innerHTML='';const t=Math.ceil(le),l=Math.floor(age);const now=new Date(),yearStart=new Date(now.getFullYear(),0,1),yearEnd=new Date(now.getFullYear()+1,0,1),yearFrac=(now-yearStart)/(yearEnd-yearStart);for(let i=0;i<t;i++){const d=document.createElement('div');d.className='dot '+(i<l?'lived':i===l?'current':'remaining');if(i===l){d.style.setProperty('--yr-pct',(yearFrac*100).toFixed(0)+'%')}c.appendChild(d)}}
 
 function renderCards(rem){
   const g=document.getElementById('cdGrid');
