@@ -10,6 +10,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;600;800;900&family=Noto+Sans+SC:wght@300;400;500;700;900&family=DM+Mono:wght@300;400;500&family=Orbitron:wght@400;700&family=Share+Tech+Mono&family=VT323&family=Silkscreen&family=Press+Start+2P&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -263,6 +264,72 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 .pg-track{width:100%;height:12px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
 .pg-fill{height:100%;border-radius:6px;width:0;transition:width 1.4s cubic-bezier(.22,1,.36,1)}
 .pg-detail{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--text3);margin-top:8px}
+
+/* === HOLIDAYS === */
+.holidays-section{margin-bottom:36px}
+.holidays-section .glass-strong{padding:24px}
+.hol-item{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.hol-item:last-child{margin-bottom:0}
+.hol-icon{font-size:1.2rem;width:32px;text-align:center;flex-shrink:0}
+.hol-info{flex:1;min-width:0}
+.hol-name{font-size:.85rem;color:var(--text);font-weight:500}
+.hol-sub{font-size:.68rem;color:var(--text3);margin-top:2px}
+.hol-days{font-family:'Outfit',sans-serif;font-size:1rem;font-weight:800;white-space:nowrap;min-width:70px;text-align:right;color:var(--amber)}
+
+/* === WIDGET SYSTEM === */
+.widget-hidden{display:none !important}
+.widget-sep::before{content:'';display:block;width:48px;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);margin:0 auto 36px;border-radius:1px}
+@media(max-width:1199px){
+  .screen-result.visible{display:flex;flex-direction:column}
+  .screen-result .top-bar{order:-10}
+  .screen-result .hero{order:-9}
+  .screen-result .life-bar-section{order:-8}
+  .screen-result > .sep{display:none}
+}
+
+/* === SETTINGS PANEL === */
+.settings-backdrop{position:fixed;inset:0;z-index:180;background:rgba(0,0,0,.45);opacity:0;transition:opacity .3s ease;pointer-events:none}
+.settings-backdrop.open{opacity:1;pointer-events:auto}
+.settings-panel{
+  position:fixed;top:0;right:0;bottom:0;width:360px;max-width:88vw;z-index:190;
+  background:rgba(18,20,44,.98);border-left:1px solid rgba(255,255,255,.1);
+  transform:translateX(100%);transition:transform .35s cubic-bezier(.22,1,.36,1);
+  display:flex;flex-direction:column;
+}
+.settings-panel.open{transform:translateX(0)}
+.settings-header{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 14px;flex-shrink:0}
+.settings-title{font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:800}
+.settings-close{width:30px;height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;transition:all .2s}
+.settings-close:hover{background:rgba(255,255,255,.12);color:var(--text)}
+.settings-body{flex:1;overflow-y:auto;padding-bottom:20px}
+.settings-section{padding:0 20px 16px}
+.settings-label{font-size:.68rem;color:var(--text3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;font-weight:500}
+.widget-list{list-style:none;padding:0;margin:0}
+.widget-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:6px;transition:background .2s;cursor:default}
+.widget-row:hover{background:rgba(255,255,255,.06)}
+.widget-row.sortable-ghost{opacity:.3}
+.widget-row.sortable-chosen{background:rgba(232,71,126,.08);border-color:rgba(232,71,126,.2)}
+.widget-drag{cursor:grab;color:var(--text3);font-size:.9rem;flex-shrink:0;user-select:none;line-height:1}
+.widget-drag:active{cursor:grabbing}
+.widget-name{flex:1;font-size:.82rem;font-weight:500}
+.widget-toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.widget-toggle input{opacity:0;width:0;height:0;position:absolute}
+.widget-toggle .toggle-track{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:11px;cursor:pointer;transition:background .3s}
+.widget-toggle input:checked+.toggle-track{background:var(--red)}
+.widget-toggle .toggle-track::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:transform .3s}
+.widget-toggle input:checked+.toggle-track::after{transform:translateX(18px)}
+.settings-divider{height:1px;background:rgba(255,255,255,.06);margin:4px 20px 16px}
+.settings-row{display:flex;align-items:center;gap:10px;padding:0 20px 14px;cursor:pointer}
+.settings-row:hover .settings-row-label{color:var(--text)}
+.settings-row-label{font-size:.82rem;color:var(--text2);flex:1;transition:color .2s}
+.settings-row-val{font-family:'DM Mono',monospace;font-size:.78rem;color:var(--text3)}
+.settings-row-arrow{color:var(--text3);font-size:.78rem}
+.settings-font-sel{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--text2);font-family:'Noto Sans SC',sans-serif;font-size:.75rem;cursor:pointer;outline:none}
+.settings-font-sel option{background:#1a1d3a}
+.hol-sub-list{list-style:none;padding:0 0 0 20px;margin:0 0 6px}
+.hol-sub-row{padding:7px 10px !important;margin-bottom:4px !important;background:rgba(255,255,255,.02) !important;border-color:rgba(255,255,255,.04) !important;border-radius:8px !important}
+.settings-reset{display:block;margin:auto 20px 0;padding:10px;border-radius:10px;border:1px solid rgba(232,71,126,.15);background:rgba(232,71,126,.04);color:var(--red);font-family:'Noto Sans SC',sans-serif;font-size:.78rem;cursor:pointer;text-align:center;transition:all .2s;width:calc(100% - 40px)}
+.settings-reset:hover{background:rgba(232,71,126,.1)}
 
 /* === QUOTE CAROUSEL === */
 .quote-sec{text-align:center;padding:32px 16px 20px;margin-bottom:20px;position:relative}
@@ -551,25 +618,28 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
     grid-template-rows:auto auto 1fr 1fr;
     gap:12px;
     height:calc(100dvh - 56px);
-    overflow:hidden;
+    overflow-y:auto;overflow-x:hidden;
     padding:8px 0 0;
     grid-auto-flow:dense;
+    scrollbar-width:none;
   }
+  .screen-result.visible::-webkit-scrollbar{display:none}
   .screen-result.visible > *{margin-bottom:0}
 
-  /* Hide seps + remaining title */
+  /* Hide seps + remaining title + countdown wrapper passthrough */
   .screen-result > .sep{display:none}
   .screen-result #remaining{display:none}
+  .screen-result #countdownWidget{display:contents}
 
-  /* Row 1: Top bar */
-  .screen-result .top-bar{grid-column:1/-1;grid-row:1;padding-top:6px;margin-bottom:0}
+  /* Fixed: Top bar */
+  .screen-result .top-bar{grid-column:1/-1;grid-row:1;padding-top:6px;margin-bottom:0;order:-10}
 
-  /* Row 2: Hero (col 1) + Life bar (cols 2-3) */
-  .screen-result .hero{grid-column:1;grid-row:2;text-align:center;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  /* Fixed: Hero (col 1) + Life bar (cols 2-3) */
+  .screen-result .hero{grid-column:1;grid-row:2;order:-9;text-align:center;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
   .screen-result .hero-age{font-size:clamp(3.5rem,5vw,5rem)}
   .screen-result .hero-decimal{font-size:clamp(.8rem,1.2vw,1.2rem)}
   .screen-result .hero-label{font-size:.7rem;margin-top:4px}
-  .screen-result .life-bar-section{grid-column:2/4;grid-row:2;align-self:center}
+  .screen-result .life-bar-section{grid-column:2/4;grid-row:2;order:-8;align-self:center}
   .screen-result .life-bar-section .glass-strong{padding:10px 18px 8px}
   .screen-result .life-bar-pct{font-size:1.4rem}
   .screen-result .life-bar-track{height:28px}
@@ -583,8 +653,8 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .screen-result .sec-title-row{display:none}
   .screen-result .adj-open-btn{font-size:.6rem;padding:4px 8px}
 
-  /* Row 3: Dots | Countdown | Progress */
-  .screen-result .dot-section{grid-column:1;grid-row:3;overflow:hidden}
+  /* Widget sections — auto-placed by CSS order */
+  .screen-result .dot-section{overflow:hidden}
   .screen-result .dot-section .glass-strong{padding:10px 14px;height:100%;display:flex;flex-direction:column}
   .screen-result .dot-title{display:none}
   .screen-result .dot-matrix{grid-template-columns:repeat(10,1fr);gap:3px;flex:1}
@@ -597,7 +667,6 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .screen-result .dot-stats .dot-stat-rem{color:var(--text3)}
 
   .screen-result .cd-grid{
-    grid-column:2;grid-row:3;
     grid-template-columns:1fr 1fr;gap:8px;
     background:rgba(18,20,44,.75);border:1px solid rgba(255,255,255,.12);
     border-radius:var(--radius);padding:14px;
@@ -612,7 +681,7 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .screen-result .cd-label{font-size:.58rem}
   .screen-result .cd-sub{font-size:.52rem;margin-top:2px}
 
-  .screen-result .prog-section{grid-column:3;grid-row:3;overflow-y:auto;scrollbar-width:none}
+  .screen-result .prog-section{overflow-y:auto;scrollbar-width:none}
   .screen-result .prog-section::-webkit-scrollbar{display:none}
   .screen-result .prog-section .glass-strong{padding:14px}
   .screen-result .pg-item{margin-bottom:12px}
@@ -622,8 +691,7 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .screen-result .pg-track{height:8px}
   .screen-result .pg-detail{font-size:.62rem;margin-top:3px}
 
-  /* Row 4: Allocation | Companion | Quote */
-  .screen-result .alloc-section{grid-column:1;grid-row:4;overflow-y:auto;scrollbar-width:none}
+  .screen-result .alloc-section{overflow-y:auto;scrollbar-width:none}
   .screen-result .alloc-section::-webkit-scrollbar{display:none}
   .screen-result .alloc-section .glass-strong{padding:12px}
   .screen-result .al-item{gap:8px;margin-bottom:7px}
@@ -638,7 +706,7 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .screen-result .al-item.free-time .al-yrs{font-size:.9rem}
   .screen-result .free-tooltip{display:none !important}
 
-  .screen-result .companion-section{grid-column:2;grid-row:4;overflow-y:auto;scrollbar-width:none}
+  .screen-result .companion-section{overflow-y:auto;scrollbar-width:none}
   .screen-result .companion-section::-webkit-scrollbar{display:none}
   .screen-result .companion-section .glass-strong{padding:14px}
   .screen-result .comp-hero{font-size:clamp(1.8rem,3.5vw,2.8rem)}
@@ -648,10 +716,10 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .screen-result .comp-add-btn{padding:8px;font-size:.68rem;margin-top:8px}
 
   .screen-result .quote-sec{
-    grid-column:3;grid-row:4;
     display:flex;flex-direction:column;
     background:rgba(18,20,44,.75);border:1px solid rgba(255,255,255,.12);
-    border-radius:var(--radius);padding:14px 16px;position:relative;
+    border-radius:var(--radius);padding:10px 14px;position:relative;
+    min-height:0;
   }
   .screen-result .quote-sec .db-panel-header{flex-shrink:0}
   .screen-result .quote-slides{flex:1;align-items:center}
@@ -665,6 +733,42 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .screen-result .quote-nav-btn svg{width:10px;height:10px}
   .screen-result .quote-dot{width:4px;height:4px}
   .screen-result .quote-dot.active{width:12px}
+
+  /* Holidays compact */
+  .screen-result .holidays-section{overflow-y:auto;scrollbar-width:none}
+  .screen-result .holidays-section::-webkit-scrollbar{display:none}
+  .screen-result .holidays-section .glass-strong{padding:12px}
+  .screen-result .hol-item{gap:8px;margin-bottom:8px}
+  .screen-result .hol-icon{font-size:.9rem;width:24px}
+  .screen-result .hol-name{font-size:.7rem}
+  .screen-result .hol-days{font-size:.8rem;min-width:56px}
+  .screen-result .hol-sub{font-size:.55rem}
+
+  /* countdownWidget passthrough for grid */
+  .screen-result [data-widget="countdown"]{display:contents}
+
+  /* When quotes + holidays share one grid cell side by side */
+  .screen-result .widget-shared-wrap{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;
+    min-height:0;
+  }
+  .screen-result .widget-shared-wrap > *{min-width:0;min-height:0;overflow:hidden}
+  .screen-result .widget-shared-wrap .quote-sec{padding:8px 10px;margin:0}
+  .screen-result .widget-shared-wrap .quote-sec .db-panel-header .db-expand-btn{display:none !important}
+  .screen-result .widget-shared-wrap .quote-slide .quote-prompt{font-size:.72rem;line-height:1.5}
+  .screen-result .widget-shared-wrap .quote-slide .quote-text{font-size:.72rem;line-height:1.5}
+  .screen-result .widget-shared-wrap .quote-slide .quote-mark{font-size:1.6rem;margin-bottom:-4px}
+  .screen-result .widget-shared-wrap .quote-slide .quote-prompt-sub{font-size:.55rem;margin-top:3px}
+  .screen-result .widget-shared-wrap .quote-nav{margin-top:3px}
+  .screen-result .widget-shared-wrap .holidays-section{margin:0;overflow-y:auto;scrollbar-width:none}
+  .screen-result .widget-shared-wrap .holidays-section::-webkit-scrollbar{display:none}
+  .screen-result .widget-shared-wrap .holidays-section .glass-strong{padding:8px 10px}
+  .screen-result .widget-shared-wrap .holidays-section .db-panel-header{display:none}
+  .screen-result .widget-shared-wrap .hol-item{gap:6px;margin-bottom:5px}
+  .screen-result .widget-shared-wrap .hol-icon{font-size:.8rem;width:20px}
+  .screen-result .widget-shared-wrap .hol-name{font-size:.62rem}
+  .screen-result .widget-shared-wrap .hol-days{font-size:.65rem;min-width:auto}
+  .screen-result .widget-shared-wrap .hol-sub{display:none}
 }
 
 /* === DASHBOARD PANEL HEADERS === */
@@ -803,6 +907,9 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
         <button class="btn-icon" onclick="openDeskClock()" title="桌面时钟">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </button>
+        <button class="btn-icon" onclick="openSettings()" title="设置">
+          <svg viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+        </button>
         <button class="btn-icon" id="shareBtn" onclick="shareURL()" title="分享">
           <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
         </button>
@@ -823,7 +930,7 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 
     <div id="life-bar" class="life-bar-section anim-rise d3 section-wrap" data-section="life-bar">
       <div class="glass-strong">
-        <div class="life-bar-header"><span class="life-bar-title">生命已消耗</span><span class="life-bar-pct" id="lifePct">0%</span></div>
+        <div class="life-bar-header"><span class="life-bar-title">生命已流逝</span><span class="life-bar-pct" id="lifePct">0%</span></div>
         <div class="life-bar-track">
           <div class="life-bar-fill" id="lifeBarFill"></div>
           <div class="life-bar-rem" id="lifeRemPct">剩余 0%</div>
@@ -838,7 +945,7 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
       </div>
     </div>
 
-    <div id="life-dots" class="dot-section anim-rise d4 section-wrap" data-section="life-dots">
+    <div id="life-dots" class="dot-section anim-rise d4 section-wrap" data-section="life-dots" data-widget="matrix">
       <div class="glass-strong">
         <div class="dot-title">你的一生 · 每个方块 = 1年</div>
         <div class="dot-matrix" id="dotMatrix"></div>
@@ -851,13 +958,15 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
     </div>
 
     <div class="sep anim-fade d5"></div>
-    <div id="remaining" class="anim-fade d5 section-wrap" data-section="remaining">
-      <div class="sec-title">剩余时间</div>
+    <div id="countdownWidget" data-widget="countdown">
+      <div id="remaining" class="anim-fade d5 section-wrap" data-section="remaining">
+        <div class="sec-title">剩余时间</div>
+      </div>
+      <div class="cd-grid" id="cdGrid"></div>
     </div>
-    <div class="cd-grid" id="cdGrid"></div>
 
     <div class="sep anim-fade d7"></div>
-    <div id="allocation" class="alloc-section anim-rise d8 section-wrap" data-section="allocation">
+    <div id="allocation" class="alloc-section anim-rise d8 section-wrap" data-section="allocation" data-widget="allocation">
       <div class="sec-title-row">
         <div class="sec-title">剩余时间将如何度过</div>
         <button class="adj-open-btn" onclick="openAdj()">
@@ -869,7 +978,7 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
     </div>
 
     <div class="sep anim-fade d9"></div>
-    <div id="companion" class="companion-section anim-rise d9 section-wrap" data-section="companion">
+    <div id="companion" class="companion-section anim-rise d9 section-wrap" data-section="companion" data-widget="companion">
       <div class="sec-title-row">
         <div class="sec-title">陪伴时间</div>
         <button class="adj-open-btn" onclick="openCompAdj()">
@@ -881,13 +990,13 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
     </div>
 
     <div class="sep anim-fade d10"></div>
-    <div id="progress" class="prog-section anim-rise d10 section-wrap" data-section="progress">
+    <div id="progress" class="prog-section anim-rise d10 section-wrap" data-section="progress" data-widget="progress">
       <div class="sec-title">时间进度</div>
       <div class="glass-strong"><div id="progList"></div></div>
     </div>
 
     <div class="sep anim-fade d11"></div>
-    <div id="quote" class="quote-sec anim-fade d12 section-wrap" data-section="quote">
+    <div id="quote" class="quote-sec anim-fade d12 section-wrap" data-section="quote" data-widget="quotes">
       <div class="quote-slides" id="quoteSlides"></div>
       <div class="quote-nav">
         <button class="quote-nav-btn" id="quotePrev"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -895,6 +1004,44 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
         <button class="quote-nav-btn" id="quoteNext"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
       </div>
     </div>
+
+    <div class="sep anim-fade d12"></div>
+    <div id="holidays" class="holidays-section anim-rise d12 section-wrap" data-section="holidays" data-widget="holidays">
+      <div class="sec-title">节日倒数</div>
+      <div class="glass-strong"><div id="holidayList"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-backdrop" id="settingsBackdrop"></div>
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <span class="settings-title">设置</span>
+    <button class="settings-close" id="settingsClose">✕</button>
+  </div>
+  <div class="settings-body">
+    <div class="settings-section">
+      <div class="settings-label">小组件</div>
+      <ul class="widget-list" id="widgetList"></ul>
+    </div>
+    <div class="settings-divider"></div>
+    <div class="settings-section">
+      <div class="settings-row" onclick="openModal();closeSettings()">
+        <span class="settings-row-label">预期寿命</span>
+        <span class="settings-row-val" id="settingsLE">—</span>
+      </div>
+      <div class="settings-row" onclick="openDeskClock();closeSettings()">
+        <span class="settings-row-label">桌面时钟</span>
+        <span class="settings-row-arrow">→</span>
+      </div>
+      <div class="settings-row">
+        <span class="settings-row-label">时钟字体</span>
+        <select class="settings-font-sel" id="settingsFontSelect" onchange="selectDcFont(parseInt(this.value))"></select>
+      </div>
+    </div>
+    <div class="settings-divider"></div>
+    <button class="settings-reset" id="settingsReset">恢复默认</button>
   </div>
 </div>
 
@@ -1100,6 +1247,223 @@ async function loadReport(id){
   return data;
 }
 
+// ===== WIDGET SYSTEM =====
+const WIDGETS=[
+  {id:'matrix',name:'生命矩阵',defaultOn:true,el:'#life-dots'},
+  {id:'countdown',name:'剩余时间',defaultOn:true,el:'#cdGrid'},
+  {id:'allocation',name:'时间分配',defaultOn:true,el:'#allocation'},
+  {id:'companion',name:'陪伴时间',defaultOn:true,el:'#companion'},
+  {id:'progress',name:'时间进度',defaultOn:true,el:'#progress'},
+  {id:'quotes',name:'每日一言',defaultOn:true,el:'#quote'},
+  {id:'holidays',name:'节日倒数',defaultOn:false,el:'#holidays'},
+];
+const DEFAULT_WIDGET_ORDER=WIDGETS.filter(w=>w.defaultOn).map(w=>w.id);
+let widgetConfig=[...DEFAULT_WIDGET_ORDER];
+
+function isWidgetHidden(id){return !widgetConfig.includes(id)}
+
+function getWidgetEl(id){
+  const w=WIDGETS.find(x=>x.id===id);
+  if(!w)return null;
+  // countdown uses wrapper
+  if(id==='countdown')return document.getElementById('countdownWidget');
+  return document.querySelector(w.el);
+}
+
+function applyWidgetConfig(){
+  const allIds=WIDGETS.map(w=>w.id);
+  // Visibility
+  allIds.forEach(id=>{
+    const el=getWidgetEl(id);
+    if(el)el.classList.toggle('widget-hidden',!widgetConfig.includes(id));
+  });
+  // Order via CSS order property
+  widgetConfig.forEach((id,i)=>{
+    const el=getWidgetEl(id);
+    if(el)el.style.order=i+1;
+  });
+  allIds.filter(id=>!widgetConfig.includes(id)).forEach(id=>{
+    const el=getWidgetEl(id);
+    if(el)el.style.order=999;
+  });
+  // When both quotes and holidays visible on PC, wrap them side by side
+  const quoteEl=document.querySelector('#quote');
+  const holEl=document.getElementById('holidays');
+  const bothVisible=widgetConfig.includes('quotes')&&widgetConfig.includes('holidays')&&window.innerWidth>=1200;
+  const existingWrap=document.getElementById('sharedQuoteHol');
+  if(bothVisible&&!existingWrap&&quoteEl&&holEl){
+    const wrap=document.createElement('div');
+    wrap.className='widget-shared-wrap';wrap.id='sharedQuoteHol';
+    quoteEl.parentElement.insertBefore(wrap,quoteEl);
+    wrap.appendChild(quoteEl);wrap.appendChild(holEl);
+    // Give wrap the order of whichever comes first
+    const qi=widgetConfig.indexOf('quotes'),hi=widgetConfig.indexOf('holidays');
+    wrap.style.order=Math.min(qi,hi)+1;
+  } else if(!bothVisible&&existingWrap){
+    // Unwrap: move children back to resultScreen
+    const parent=existingWrap.parentElement;
+    while(existingWrap.firstChild)parent.insertBefore(existingWrap.firstChild,existingWrap);
+    existingWrap.remove();
+  }
+  // Mobile separators
+  if(window.innerWidth<1200){
+    document.querySelectorAll('#resultScreen > .sep').forEach(s=>s.style.display='none');
+    document.querySelectorAll('[data-widget]').forEach(el=>el.classList.remove('widget-sep'));
+    const visible=widgetConfig.map(id=>getWidgetEl(id)).filter(Boolean);
+    visible.slice(1).forEach(el=>el.classList.add('widget-sep'));
+  }
+}
+
+// ===== HOLIDAYS LOOKUP (lunar dates 2024-2040) =====
+const LUNAR_HOLIDAYS={
+  chunJie:[[2024,2,10],[2025,1,29],[2026,2,17],[2027,2,6],[2028,1,26],[2029,2,13],[2030,2,3],[2031,1,23],[2032,2,11],[2033,1,31],[2034,2,19],[2035,2,8],[2036,1,28],[2037,2,15],[2038,2,4],[2039,1,24],[2040,2,12]],
+  zhongQiu:[[2024,9,17],[2025,10,6],[2026,9,25],[2027,9,15],[2028,10,3],[2029,9,22],[2030,9,12],[2031,10,1],[2032,9,19],[2033,9,8],[2034,9,27],[2035,9,16],[2036,10,4],[2037,9,24],[2038,9,13],[2039,10,2],[2040,9,21]],
+  duanWu:[[2024,6,10],[2025,5,31],[2026,6,19],[2027,6,9],[2028,5,28],[2029,6,16],[2030,6,5],[2031,5,25],[2032,6,13],[2033,6,3],[2034,6,22],[2035,6,11],[2036,5,31],[2037,6,19],[2038,6,8],[2039,5,28],[2040,6,15]],
+  qingMing:[[2024,4,4],[2025,4,4],[2026,4,5],[2027,4,5],[2028,4,4],[2029,4,4],[2030,4,5],[2031,4,5],[2032,4,4],[2033,4,4],[2034,4,5],[2035,4,5],[2036,4,4],[2037,4,4],[2038,4,5],[2039,4,5],[2040,4,4]],
+};
+
+function _nextHoliday(table,now){
+  for(const[y,m,d]of table){const dt=new Date(y,m-1,d);if(dt>now)return dt}
+  const last=table[table.length-1];
+  for(let fy=last[0]+1;fy<last[0]+50;fy++){const dt=new Date(fy,last[1]-1,last[2]);if(dt>now)return dt}
+  return null;
+}
+
+const ALL_HOLIDAYS=[
+  {id:'birthday',icon:'🎂',label:'生日'},
+  {id:'chunJie',icon:'🧧',label:'春节'},
+  {id:'zhongQiu',icon:'🥮',label:'中秋'},
+  {id:'duanWu',icon:'🐉',label:'端午'},
+  {id:'qingMing',icon:'🌿',label:'清明'},
+  {id:'guoQing',icon:'🇨🇳',label:'国庆'},
+];
+const DEFAULT_HOL_ORDER=ALL_HOLIDAYS.map(h=>h.id);
+let holConfig=[...DEFAULT_HOL_ORDER]; // ordered list of visible holiday IDs
+
+function renderHolidays(){
+  const el=document.getElementById('holidayList');
+  if(!el||!birth)return;
+  const now=new Date(),by=birth.getFullYear();
+  const allItems={};
+  // Birthday
+  let nb=new Date(now.getFullYear(),birth.getMonth(),birth.getDate());
+  if(nb<=now)nb=new Date(now.getFullYear()+1,birth.getMonth(),birth.getDate());
+  allItems.birthday={icon:'🎂',name:`你的第 ${nb.getFullYear()-by} 个生日`,days:Math.ceil((nb-now)/864e5)};
+  // Lunar holidays
+  ['chunJie','zhongQiu','duanWu','qingMing'].forEach(key=>{
+    const next=_nextHoliday(LUNAR_HOLIDAYS[key],now);
+    const h=ALL_HOLIDAYS.find(x=>x.id===key);
+    if(next)allItems[key]={icon:h.icon,name:`你的第 ${next.getFullYear()-by} 个${h.label}`,days:Math.ceil((next-now)/864e5)};
+  });
+  // National Day
+  let ng=new Date(now.getFullYear(),9,1);
+  if(ng<=now)ng=new Date(now.getFullYear()+1,9,1);
+  allItems.guoQing={icon:'🇨🇳',name:`你的第 ${ng.getFullYear()-by} 个国庆`,days:Math.ceil((ng-now)/864e5)};
+  // Render in config order, skip hidden
+  const items=holConfig.map(id=>allItems[id]).filter(Boolean);
+  items.sort((a,b)=>a.days-b.days);
+  el.innerHTML=items.map(h=>`<div class="hol-item"><div class="hol-icon">${h.icon}</div><div class="hol-info"><div class="hol-name">${h.name}</div></div><div class="hol-days">还有 ${h.days} 天</div></div>`).join('');
+}
+
+// ===== SETTINGS PANEL =====
+function openSettings(){
+  const list=document.getElementById('widgetList');
+  list.innerHTML='';
+  const allIds=WIDGETS.map(w=>w.id);
+  const ordered=[...widgetConfig,...allIds.filter(id=>!widgetConfig.includes(id))];
+  ordered.forEach(id=>{
+    const w=WIDGETS.find(x=>x.id===id);
+    const isOn=widgetConfig.includes(id);
+    const li=document.createElement('li');
+    li.className='widget-row';li.dataset.widgetId=id;
+    li.innerHTML=`<span class="widget-drag">☰</span><span class="widget-name">${w.name}</span><label class="widget-toggle"><input type="checkbox" ${isOn?'checked':''} onchange="toggleWidget('${id}',this.checked)"><span class="toggle-track"></span></label>`;
+    list.appendChild(li);
+    // Holiday sub-list
+    if(id==='holidays'){
+      const sub=document.createElement('ul');
+      sub.className='hol-sub-list';sub.id='holSubList';
+      sub.style.display=isOn?'block':'none';
+      const holOrdered=[...holConfig,...DEFAULT_HOL_ORDER.filter(h=>!holConfig.includes(h))];
+      holOrdered.forEach(hid=>{
+        const h=ALL_HOLIDAYS.find(x=>x.id===hid);
+        const hOn=holConfig.includes(hid);
+        const hli=document.createElement('li');
+        hli.className='widget-row hol-sub-row';hli.dataset.holId=hid;
+        hli.innerHTML=`<span class="widget-drag" style="font-size:.75rem">☰</span><span class="widget-name" style="font-size:.75rem">${h.icon} ${h.label}</span><label class="widget-toggle" style="width:34px;height:18px"><input type="checkbox" ${hOn?'checked':''} onchange="toggleHoliday('${hid}',this.checked)"><span class="toggle-track" style="border-radius:9px"><style>.hol-sub-row .toggle-track::after{width:12px!important;height:12px!important;top:3px!important;left:3px!important}.hol-sub-row input:checked+.toggle-track::after{transform:translateX(16px)!important}</style></span></label>`;
+        sub.appendChild(hli);
+      });
+      list.appendChild(sub);
+      if(window._holSortable)window._holSortable.destroy();
+      if(isOn)window._holSortable=new Sortable(sub,{animation:200,handle:'.widget-drag',ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',onEnd:syncHolOrder});
+    }
+  });
+  if(window._settingsSortable)window._settingsSortable.destroy();
+  window._settingsSortable=new Sortable(list,{animation:200,handle:'.widget-drag',ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',filter:'.hol-sub-list,.hol-sub-row',onEnd:syncWidgetOrder});
+  document.getElementById('settingsLE').textContent=le+' 岁';
+  const fs=document.getElementById('settingsFontSelect');
+  fs.innerHTML=dcFonts.map((f,i)=>`<option value="${i}"${i===dcFontIdx?' selected':''}>${f.label}</option>`).join('');
+  document.getElementById('settingsBackdrop').classList.add('open');
+  document.getElementById('settingsPanel').classList.add('open');
+}
+
+function closeSettings(){
+  document.getElementById('settingsBackdrop').classList.remove('open');
+  document.getElementById('settingsPanel').classList.remove('open');
+  stateToURL();
+}
+
+function toggleWidget(id,checked){
+  if(checked&&!widgetConfig.includes(id))widgetConfig.push(id);
+  else if(!checked)widgetConfig=widgetConfig.filter(x=>x!==id);
+  applyWidgetConfig();
+  if(checked)renderAll();
+  // Show/hide holiday sub-list
+  if(id==='holidays'){
+    const sub=document.getElementById('holSubList');
+    if(sub){
+      sub.style.display=checked?'block':'none';
+      if(checked&&window.Sortable){
+        if(window._holSortable)window._holSortable.destroy();
+        window._holSortable=new Sortable(sub,{animation:200,handle:'.widget-drag',ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',onEnd:syncHolOrder});
+      }
+    }
+  }
+}
+
+function toggleHoliday(hid,checked){
+  if(checked&&!holConfig.includes(hid))holConfig.push(hid);
+  else if(!checked)holConfig=holConfig.filter(x=>x!==hid);
+  renderHolidays();
+}
+
+function syncHolOrder(){
+  const rows=document.querySelectorAll('#holSubList .hol-sub-row');
+  const newOrder=[];
+  rows.forEach(row=>{
+    const id=row.dataset.holId;
+    if(row.querySelector('input').checked)newOrder.push(id);
+  });
+  holConfig=newOrder;
+  renderHolidays();
+}
+
+function syncWidgetOrder(){
+  const rows=document.querySelectorAll('#widgetList .widget-row');
+  const newOrder=[];
+  rows.forEach(row=>{
+    const id=row.dataset.widgetId;
+    if(row.querySelector('input').checked)newOrder.push(id);
+  });
+  widgetConfig=newOrder;
+  applyWidgetConfig();
+}
+
+function resetWidgetConfig(){
+  widgetConfig=[...DEFAULT_WIDGET_ORDER];
+  holConfig=[...DEFAULT_HOL_ORDER];
+  applyWidgetConfig();renderAll();openSettings();
+}
+
 const LE={
   CN:{m:75.5,f:81.5},US:{m:76.3,f:81.4},JP:{m:81.5,f:87.6},KR:{m:80.5,f:86.6},
   GB:{m:79.4,f:83.0},DE:{m:78.8,f:83.4},FR:{m:79.8,f:85.7},AU:{m:81.3,f:85.4},
@@ -1144,6 +1508,14 @@ function stateToURL(){
   const compStr=[cs.parentAge,cs.parentLE,cs.visits,cs.days,cs.hours,cs.hasChild?1:0,cs.childAge,cs.childLeave,cs.childHours].join(',');
   const compDefault=[Math.round(ageX())+25,78,2,3,6,0,3,18,3].join(',');
   if(compStr!==compDefault)p.set('comp',compStr);
+  // widget config
+  const wStr=widgetConfig.join(',');
+  const defaultWStr=DEFAULT_WIDGET_ORDER.join(',');
+  if(wStr!==defaultWStr)p.set('w',wStr);
+  // holiday config
+  const hStr=holConfig.join(',');
+  const defaultHStr=DEFAULT_HOL_ORDER.join(',');
+  if(hStr!==defaultHStr)p.set('hol',hStr);
   history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||''));
   // sync to Supabase if we have a report
   if(rid)updateReport(rid);
@@ -1210,6 +1582,18 @@ function _restoreAllocComp(p){
     if(cv.length===9&&cv.every(v=>!isNaN(v))){
       compState={parentAge:cv[0],parentLE:cv[1],visits:cv[2],days:cv[3],hours:cv[4],hasChild:cv[5]===1,childAge:cv[6],childLeave:cv[7],childHours:cv[8]};
     }
+  }
+  // Widget config
+  const wParam=p.get('w');
+  if(wParam){
+    const ids=wParam.split(',').filter(id=>WIDGETS.some(w=>w.id===id));
+    if(ids.length>0)widgetConfig=ids;
+  }
+  // Holiday config
+  const holParam=p.get('hol');
+  if(holParam){
+    const hids=holParam.split(',').filter(id=>ALL_HOLIDAYS.some(h=>h.id===id));
+    if(hids.length>0)holConfig=hids;
   }
 }
 
@@ -1411,7 +1795,7 @@ function applyCompAdj(){
     const el=document.getElementById(d.id);
     if(el)compState[d.key]=parseFloat(el.value);
   });
-  closeCompAdj();renderCompanion();stateToURL();
+  closeCompAdj();renderCompanion();renderQuote();stateToURL();
 }
 
 function getBirthFromSelects(){
@@ -1456,7 +1840,14 @@ function renderAll(){
   requestAnimationFrame(()=>{document.getElementById('lifeBarFill').style.width=pct+'%'});
   // Set default parent age based on user age
   if(!compState._init){compState._init=true;compState.parentAge=Math.min(120,Math.round(age)+25);}
-  renderDots(age);renderCards(rem);renderAlloc(rem);renderCompanion();renderProg();renderQuote(pct);
+  if(!isWidgetHidden('matrix'))renderDots(age);
+  if(!isWidgetHidden('countdown'))renderCards(rem);
+  if(!isWidgetHidden('allocation'))renderAlloc(rem);
+  if(!isWidgetHidden('companion'))renderCompanion();
+  if(!isWidgetHidden('progress'))renderProg();
+  if(!isWidgetHidden('holidays'))renderHolidays();
+  renderQuote(pct);
+  applyWidgetConfig();
   setTimeout(()=>{document.querySelectorAll('.al-fill[data-w]').forEach(el=>{el.style.width=el.dataset.w})},100);
   setTimeout(()=>{document.querySelectorAll('.pg-fill[data-w]').forEach(el=>{el.style.width=el.dataset.w})},200);
   // Init dashboard expand buttons on desktop
@@ -1570,7 +1961,7 @@ function _quoteGoTo(idx){
   const container=document.getElementById('quoteSlides');
   if(!container||!container.children.length)return;
   _quoteIdx=((idx%_quoteTotal)+_quoteTotal)%_quoteTotal;
-  container.children[_quoteIdx].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  container.scrollTo({left:container.children[_quoteIdx].offsetLeft,behavior:'smooth'});
 }
 
 function _quoteResetAuto(){
@@ -1589,8 +1980,8 @@ function renderQuote(pct){
   const yrPct=((n-new Date(yr,0,1))/(new Date(yr+1,0,1)-new Date(yr,0,1))*100).toFixed(0);
 
   const prompts=[
-    {text:`你还能见父母 <em>${parentMeets} 次</em>。<br>下一次打算什么时候？`,sub:'每一次见面都在倒数'},
     {text:`你有 <em>${freeDays.toLocaleString()} 小时</em>的自由时间。<br>如果只能做一件事，你会做什么？`,sub:'去掉睡觉、工作、吃饭……这是真正属于你的'},
+    {text:`你还能见父母 <em>${parentMeets} 次</em>。<br>下一次打算什么时候？`,sub:'每一次见面都在倒数'},
     {text:`${yr}年已经过了 <em>${yrPct}%</em>。<br>年初的计划还记得吗？`,sub:'时间不会等你准备好'},
     {text:`你还剩 <em>${remWeekends.toLocaleString()} 个周末</em>。<br>这周末打算怎么过？`,sub:'每个周末都是不可再生资源'},
     {text:`你的一生只剩 <em>${freeYrs} 年</em>的自由时间。<br>大概只够认真做好一件事。<br>你想好了吗？`,sub:''},
@@ -1698,8 +2089,8 @@ function _buildDcQuotes(){
   const yr=new Date().getFullYear();
   const yrPct=((new Date()-new Date(yr,0,1))/(new Date(yr+1,0,1)-new Date(yr,0,1))*100).toFixed(0);
   dcQuotes=[
-    `你还能见父母 ${parentMeets} 次，下一次打算什么时候？`,
     `你有 ${freeDays.toLocaleString()} 小时的自由时间，如果只能做一件事，你会做什么？`,
+    `你还能见父母 ${parentMeets} 次，下一次打算什么时候？`,
     `${yr}年已经过了 ${yrPct}%，年初的计划还记得吗？`,
     `你还剩 ${remWeekends.toLocaleString()} 个周末，这周末打算怎么过？`,
     `你的一生只剩 ${freeYrs} 年的自由时间，大概只够认真做好一件事`,
@@ -2278,6 +2669,10 @@ function updateDayOptions(){
 
 document.addEventListener('DOMContentLoaded',()=>{
   initDatePicker();
+  // Settings panel events
+  document.getElementById('settingsClose').addEventListener('click',closeSettings);
+  document.getElementById('settingsBackdrop').addEventListener('click',closeSettings);
+  document.getElementById('settingsReset').addEventListener('click',resetWidgetConfig);
   if(!loadFromURL()){
     // no URL state, show input screen
   }
@@ -2300,6 +2695,7 @@ function initDashboard(){
     {el:document.getElementById('companion'),title:'陪伴时间',actionBtn:'.adj-open-btn'},
     {el:document.getElementById('progress'),title:'时间进度',actionBtn:null},
     {el:document.querySelector('.quote-sec'),title:'每日一言',actionBtn:null},
+    {el:document.getElementById('holidays'),title:'节日倒数',actionBtn:null},
   ];
   panels.forEach(p=>{
     if(!p.el)return;
