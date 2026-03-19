@@ -264,10 +264,42 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 .pg-fill{height:100%;border-radius:6px;width:0;transition:width 1.4s cubic-bezier(.22,1,.36,1)}
 .pg-detail{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--text3);margin-top:8px}
 
-/* === QUOTE === */
-.quote-sec{text-align:center;padding:32px 16px;margin-bottom:20px}
-.quote-mark{font-family:'Outfit',serif;font-size:5rem;line-height:1;color:rgba(255,255,255,.08);margin-bottom:-20px}
-.quote-text{font-size:1.15rem;line-height:2;color:var(--text2);position:relative;z-index:1;font-weight:300}
+/* === QUOTE CAROUSEL === */
+.quote-sec{text-align:center;padding:32px 16px 20px;margin-bottom:20px;position:relative}
+.quote-slides{
+  display:flex;overflow-x:auto;scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;
+  gap:0;
+}
+.quote-slides::-webkit-scrollbar{display:none}
+.quote-slide{
+  min-width:100%;width:100%;scroll-snap-align:center;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:0 8px;
+}
+.quote-slide .quote-mark{font-family:'Outfit',serif;font-size:4rem;line-height:1;color:rgba(255,255,255,.08);margin-bottom:-16px}
+.quote-slide .quote-text{font-size:1.1rem;line-height:2;color:var(--text2);font-weight:300}
+.quote-slide .quote-prompt{font-size:1.05rem;line-height:1.9;color:var(--text2);font-weight:400}
+.quote-slide .quote-prompt em{font-style:normal;color:var(--text);font-weight:700}
+.quote-slide .quote-prompt-sub{font-size:.78rem;color:var(--text3);margin-top:8px}
+.quote-nav{
+  display:flex;justify-content:center;align-items:center;gap:12px;margin-top:14px;
+}
+.quote-nav-btn{
+  width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);color:var(--text3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;
+}
+.quote-nav-btn:hover{background:rgba(255,255,255,.12);color:var(--text)}
+.quote-nav-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5}
+.quote-dots{
+  display:flex;align-items:center;gap:5px;
+}
+.quote-dot{
+  width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);
+  cursor:pointer;transition:all .3s;
+}
+.quote-dot.active{width:18px;border-radius:3px;background:rgba(255,255,255,.5)}
 
 /* === TICKER === */
 .ticker{position:fixed;bottom:0;left:0;right:0;z-index:100;display:none;padding:16px 0 max(16px,env(safe-area-inset-bottom,16px));text-align:center;background:linear-gradient(to top,rgba(14,16,41,.99) 50%,transparent)}
@@ -533,10 +565,10 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
   .screen-result .top-bar{grid-column:1/-1;grid-row:1;padding-top:6px;margin-bottom:0}
 
   /* Row 2: Hero (col 1) + Life bar (cols 2-3) */
-  .screen-result .hero{grid-column:1;grid-row:2;text-align:left;padding:0;align-self:center}
-  .screen-result .hero-age{font-size:3.2rem}
-  .screen-result .hero-decimal{font-size:.8rem}
-  .screen-result .hero-label{font-size:.65rem;margin-top:2px}
+  .screen-result .hero{grid-column:1;grid-row:2;text-align:center;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .screen-result .hero-age{font-size:clamp(3.5rem,5vw,5rem)}
+  .screen-result .hero-decimal{font-size:clamp(.8rem,1.2vw,1.2rem)}
+  .screen-result .hero-label{font-size:.7rem;margin-top:4px}
   .screen-result .life-bar-section{grid-column:2/4;grid-row:2;align-self:center}
   .screen-result .life-bar-section .glass-strong{padding:10px 18px 8px}
   .screen-result .life-bar-pct{font-size:1.4rem}
@@ -622,9 +654,17 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
     border-radius:var(--radius);padding:14px 16px;position:relative;
   }
   .screen-result .quote-sec .db-panel-header{flex-shrink:0}
-  .screen-result .quote-sec .quote-mark,.screen-result .quote-sec .quote-text{text-align:center}
-  .screen-result .quote-mark{font-size:2rem;margin-bottom:-6px;flex:0}
-  .screen-result .quote-text{font-size:.82rem;line-height:1.7;flex:1;display:flex;align-items:center;justify-content:center}
+  .screen-result .quote-slides{flex:1;align-items:center}
+  .screen-result .quote-slide .quote-mark{font-size:2.5rem;margin-bottom:-8px}
+  .screen-result .quote-slide .quote-text{font-size:.92rem;line-height:1.7}
+  .screen-result .quote-slide .quote-prompt{font-size:.92rem;line-height:1.7}
+  .screen-result .quote-slide .quote-prompt em{font-size:1.05em}
+  .screen-result .quote-slide .quote-prompt-sub{font-size:.7rem}
+  .screen-result .quote-nav{margin-top:6px;gap:8px}
+  .screen-result .quote-nav-btn{width:22px;height:22px}
+  .screen-result .quote-nav-btn svg{width:10px;height:10px}
+  .screen-result .quote-dot{width:4px;height:4px}
+  .screen-result .quote-dot.active{width:12px}
 }
 
 /* === DASHBOARD PANEL HEADERS === */
@@ -700,8 +740,11 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 .db-maximized .comp-detail{font-size:.75rem !important;margin-top:8px !important}
 .db-maximized .comp-contrast{font-size:.78rem !important;padding:12px !important;margin-top:12px !important;line-height:1.7 !important}
 .db-maximized .comp-add-btn{padding:14px !important;font-size:.82rem !important;margin-top:16px !important}
-.db-maximized .quote-mark{font-size:5rem !important;margin-bottom:-20px !important}
-.db-maximized .quote-text{font-size:1.15rem !important;line-height:2 !important}
+.db-maximized .quote-slide .quote-mark{font-size:5rem !important;margin-bottom:-20px !important}
+.db-maximized .quote-slide .quote-text{font-size:1.15rem !important;line-height:2 !important}
+.db-maximized .quote-slide .quote-prompt{font-size:1.1rem !important;line-height:2 !important}
+.db-maximized .quote-slide .quote-prompt-sub{font-size:.82rem !important}
+.db-maximized .quote-dots{margin-top:16px !important}
 /* cd-grid maximized: keep grid display */
 .cd-grid.db-maximized{
   display:grid !important;grid-template-columns:repeat(3,1fr) !important;
@@ -845,8 +888,12 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 
     <div class="sep anim-fade d11"></div>
     <div id="quote" class="quote-sec anim-fade d12 section-wrap" data-section="quote">
-      <div class="quote-mark">"</div>
-      <div class="quote-text" id="quoteText"></div>
+      <div class="quote-slides" id="quoteSlides"></div>
+      <div class="quote-nav">
+        <button class="quote-nav-btn" id="quotePrev"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="quote-dots" id="quoteDots"></div>
+        <button class="quote-nav-btn" id="quoteNext"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
     </div>
   </div>
 </div>
@@ -1391,12 +1438,10 @@ function reveal(){
   document.getElementById('resultScreen').classList.add('visible');
   document.getElementById('ticker').classList.add('visible');
   renderAll();startTicker();startClock();
-  // Supabase: create new report, then update URL (stateToURL will handle future updates)
-  if(!_loadReportId()){
-    createReport().then(()=>stateToURL());
-  }else{
-    stateToURL(); // triggers updateReport via stateToURL
-  }
+  // Always create a fresh report — clear any stale ID from previous session/shared link
+  _reportId=null;
+  try{sessionStorage.removeItem('lc_reportId')}catch(e){}
+  createReport().then(()=>stateToURL());
 }
 
 function ageX(){return(Date.now()-birth.getTime())/(365.25*864e5)}
@@ -1519,9 +1564,85 @@ function renderProg(){
   el.innerHTML=items.map(it=>`<div class="pg-item"><div class="pg-header"><span class="pg-label">${it.l}</span><span class="pg-pct" style="color:${it.c}">${it.p.toFixed(1)}%</span></div><div class="pg-track"><div class="pg-fill" data-w="${it.p}%" style="background:${it.c}"></div></div><div class="pg-detail">${it.d}</div></div>`).join('');
 }
 
+let _quoteObserver=null,_quoteAutoTimer=null,_quoteIdx=0,_quoteTotal=0;
+
+function _quoteGoTo(idx){
+  const container=document.getElementById('quoteSlides');
+  if(!container||!container.children.length)return;
+  _quoteIdx=((idx%_quoteTotal)+_quoteTotal)%_quoteTotal;
+  container.children[_quoteIdx].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+function _quoteResetAuto(){
+  clearInterval(_quoteAutoTimer);
+  _quoteAutoTimer=setInterval(()=>_quoteGoTo(_quoteIdx+1),15000);
+}
+
 function renderQuote(pct){
-  const qs=['在你读完这句话的几秒里，<br>生命又少了一点。它们不会回来了。','你以为还有很多时间。<br>这是人类最普遍的错觉。','生命不是彩排。<br>你正在直播，而观众或许只有你自己。','那些"以后再说"的事，<br>"以后"已经过去了一大半。','如果你对现在不满意，<br>记住——此刻是你余生最年轻的时候。','人一生真正自由的时间，<br>大概只够认真做成一件事。'];
-  document.getElementById('quoteText').innerHTML=qs[Math.floor(pct/18)%qs.length];
+  const age=ageX(),rem=Math.max(le-age,0);
+  const freeYrs=(rem*(freeH()/24)).toFixed(1);
+  const freeDays=Math.floor(rem*(freeH()/24)*365.25);
+  const parentMeets=calcCompanion().totalMeets;
+  const remWeekends=Math.floor(rem*365.25/7);
+  const remDays=Math.floor(rem*365.25);
+  const n=new Date(),yr=n.getFullYear();
+  const yrPct=((n-new Date(yr,0,1))/(new Date(yr+1,0,1)-new Date(yr,0,1))*100).toFixed(0);
+
+  const prompts=[
+    {text:`你还能见父母 <em>${parentMeets} 次</em>。<br>下一次打算什么时候？`,sub:'每一次见面都在倒数'},
+    {text:`你有 <em>${freeDays.toLocaleString()} 小时</em>的自由时间。<br>如果只能做一件事，你会做什么？`,sub:'去掉睡觉、工作、吃饭……这是真正属于你的'},
+    {text:`${yr}年已经过了 <em>${yrPct}%</em>。<br>年初的计划还记得吗？`,sub:'时间不会等你准备好'},
+    {text:`你还剩 <em>${remWeekends.toLocaleString()} 个周末</em>。<br>这周末打算怎么过？`,sub:'每个周末都是不可再生资源'},
+    {text:`你的一生只剩 <em>${freeYrs} 年</em>的自由时间。<br>大概只够认真做好一件事。<br>你想好了吗？`,sub:''},
+    {text:`还剩 <em>${remDays.toLocaleString()} 天</em>。<br>今天你做了什么让自己不后悔的事？`,sub:'每天都在 −1'},
+  ];
+  const quotes=[
+    '在你读完这句话的几秒里，<br>生命又少了一点。它们不会回来了。',
+    '你以为还有很多时间。<br>这是人类最普遍的错觉。',
+    '生命不是彩排。<br>你正在直播，而观众或许只有你自己。',
+    '那些"以后再说"的事，<br>"以后"已经过去了一大半。',
+    '如果你对现在不满意，<br>记住——此刻是你余生最年轻的时候。',
+    '人一生真正自由的时间，<br>大概只够认真做成一件事。',
+  ];
+
+  const slides=[];
+  prompts.forEach(p=>{
+    slides.push(`<div class="quote-slide"><div class="quote-prompt">${p.text}</div>${p.sub?`<div class="quote-prompt-sub">${p.sub}</div>`:''}</div>`);
+  });
+  quotes.forEach(q=>{
+    slides.push(`<div class="quote-slide"><div class="quote-mark">"</div><div class="quote-text">${q}</div></div>`);
+  });
+
+  _quoteTotal=slides.length;
+  _quoteIdx=0;
+  const container=document.getElementById('quoteSlides');
+  const dotsEl=document.getElementById('quoteDots');
+  container.innerHTML=slides.join('');
+  dotsEl.innerHTML=slides.map((_,i)=>`<span class="quote-dot${i===0?' active':''}" data-idx="${i}"></span>`).join('');
+
+  // Dot click
+  dotsEl.querySelectorAll('.quote-dot').forEach(dot=>{
+    dot.addEventListener('click',()=>{_quoteGoTo(parseInt(dot.dataset.idx));_quoteResetAuto()});
+  });
+
+  // Prev / Next buttons
+  document.getElementById('quotePrev').onclick=()=>{_quoteGoTo(_quoteIdx-1);_quoteResetAuto()};
+  document.getElementById('quoteNext').onclick=()=>{_quoteGoTo(_quoteIdx+1);_quoteResetAuto()};
+
+  // Track active slide
+  if(_quoteObserver)_quoteObserver.disconnect();
+  _quoteObserver=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting&&e.intersectionRatio>=0.5){
+        const idx=[...container.children].indexOf(e.target);
+        if(idx>=0){_quoteIdx=idx;dotsEl.querySelectorAll('.quote-dot').forEach((d,i)=>d.classList.toggle('active',i===idx))}
+      }
+    });
+  },{root:container,threshold:0.5});
+  [...container.children].forEach(s=>_quoteObserver.observe(s));
+
+  // Auto-scroll every 30s
+  _quoteResetAuto();
 }
 
 // Combined ticker + clock in one interval, pauses when tab hidden
@@ -1529,11 +1650,11 @@ function startTicker(){
   if(tI)clearInterval(tI);
   function up(){
     if(document.hidden)return; // skip when tab not visible
-    // ticker
-    const r=remS(),y=Math.floor(r/(365.25*86400));let rest=r-y*365.25*86400;
-    const d=Math.floor(rest/86400);rest-=d*86400;const h=Math.floor(rest/3600);rest-=h*3600;
+    // ticker — total remaining days + time
+    const r=remS(),totalD=Math.floor(r/86400);
+    let rest=r-totalD*86400;const h=Math.floor(rest/3600);rest-=h*3600;
     const m=Math.floor(rest/60),s=Math.floor(rest-m*60);
-    document.getElementById('tickerVal').textContent=`${y}年 ${d}天 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    document.getElementById('tickerVal').textContent=`${totalD.toLocaleString()} 天 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     updateHero(ageX());
     // clock
     const n=new Date(),days=['日','一','二','三','四','五','六'];
@@ -1566,14 +1687,31 @@ function showCopied(){
 let dcInterval=null;
 let dcQuoteIdx=0;
 let dcQuoteTimer=null;
-const dcQuotes=[
-  '此刻是你余生最年轻的时候',
-  '你这辈子真正自由的时间，大概只够做成一件事',
-  '那些"以后再说"的事，以后已经过去了一大半',
-  '每一秒都不可逆，包括你正在看的这一秒',
-  '生命不是彩排，你正在直播',
-  '时间不会等你准备好',
-];
+let dcQuotes=[];
+function _buildDcQuotes(){
+  const age=ageX(),rem=Math.max(le-age,0);
+  const freeYrs=(rem*(freeH()/24)).toFixed(1);
+  const freeDays=Math.floor(rem*(freeH()/24)*365.25);
+  const parentMeets=calcCompanion().totalMeets;
+  const remWeekends=Math.floor(rem*365.25/7);
+  const remDays=Math.floor(rem*365.25);
+  const yr=new Date().getFullYear();
+  const yrPct=((new Date()-new Date(yr,0,1))/(new Date(yr+1,0,1)-new Date(yr,0,1))*100).toFixed(0);
+  dcQuotes=[
+    `你还能见父母 ${parentMeets} 次，下一次打算什么时候？`,
+    `你有 ${freeDays.toLocaleString()} 小时的自由时间，如果只能做一件事，你会做什么？`,
+    `${yr}年已经过了 ${yrPct}%，年初的计划还记得吗？`,
+    `你还剩 ${remWeekends.toLocaleString()} 个周末，这周末打算怎么过？`,
+    `你的一生只剩 ${freeYrs} 年的自由时间，大概只够认真做好一件事`,
+    `还剩 ${remDays.toLocaleString()} 天，今天你做了什么让自己不后悔的事？`,
+    '此刻是你余生最年轻的时候',
+    '你这辈子真正自由的时间，大概只够做成一件事',
+    '那些"以后再说"的事，以后已经过去了一大半',
+    '每一秒都不可逆，包括你正在看的这一秒',
+    '生命不是彩排，你正在直播',
+    '时间不会等你准备好',
+  ];
+}
 
 let _dcPage2Built=false;
 function openDeskClock(){
@@ -1605,10 +1743,11 @@ function openDeskClock(){
   dcInterval=setInterval(updateDeskClock,1000);
   // Auto-scale page 1 time after first render
   requestAnimationFrame(()=>autoScaleTime('dcTime'));
-  // rotate quotes
+  // rotate quotes — full list including data-driven prompts
+  _buildDcQuotes();
   dcQuoteIdx=Math.floor(Math.random()*dcQuotes.length);
   showDcQuote();
-  dcQuoteTimer=setInterval(()=>{dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;showDcQuote()},8000);
+  dcQuoteTimer=setInterval(()=>{dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;showDcQuote()},15000);
 }
 
 let dcHintDismissed=false;
@@ -1722,7 +1861,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;
       showDcQuote();
       clearInterval(dcQuoteTimer);
-      dcQuoteTimer=setInterval(()=>{dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;showDcQuote()},8000);
+      dcQuoteTimer=setInterval(()=>{dcQuoteIdx=(dcQuoteIdx+1)%dcQuotes.length;showDcQuote()},15000);
     }
   });
 });
@@ -2050,12 +2189,12 @@ function updateDeskClock(){
   document.getElementById('dcTime').innerHTML=`<span class="dc-time-hm">${h}:${m}</span><span class="dc-time-sec">:${s}</span>`;
   document.getElementById('dcDate').textContent=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} 周${days[now.getDay()]}`;
 
-  // life countdown
-  const r=remS(),ry=Math.floor(r/(365.25*86400));let rest=r-ry*365.25*86400;
-  const rd=Math.floor(rest/86400);rest-=rd*86400;
+  // life countdown — total remaining days + time
+  const r=remS(),totalDays=Math.floor(r/86400);
+  let rest=r-totalDays*86400;
   const rh=Math.floor(rest/3600);rest-=rh*3600;
   const rm=Math.floor(rest/60),rs=Math.floor(rest-rm*60);
-  document.getElementById('dcCountdown').textContent=`${ry}年 ${rd}天 ${String(rh).padStart(2,'0')}:${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
+  document.getElementById('dcCountdown').textContent=`${totalDays.toLocaleString()} 天 ${String(rh).padStart(2,'0')}:${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
 
   // bar
   const age=ageX(),pct=Math.min(age/le*100,100);
