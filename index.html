@@ -48,6 +48,7 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
 .input-subtitle{font-size:.85rem;color:var(--text2);text-align:center;margin-bottom:44px;letter-spacing:.08em}
 .form-group{width:100%;max-width:380px;margin-bottom:22px}
 .form-label{display:block;font-size:.72rem;color:var(--text2);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px;font-weight:500}
+.form-hint{font-size:.72rem;color:var(--text3);margin-top:8px;line-height:1.5}
 .form-input,.country-select{width:100%;padding:18px 20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:var(--radius-sm);color:var(--text);font-family:'DM Mono',monospace;font-size:1.15rem;outline:none;transition:all .35s ease;appearance:none;-webkit-appearance:none}
 .form-input:focus,.country-select:focus,.date-select:focus{border-color:rgba(255,59,92,.5);box-shadow:0 0 0 4px rgba(255,59,92,.12)}
 .date-picker-row{display:flex;gap:8px}
@@ -526,6 +527,7 @@ body{font-family:'Noto Sans SC','Outfit',sans-serif;background:var(--bg);color:v
       <select class="country-select" id="country">
         <option value="CN">🇨🇳 中国</option><option value="US">🇺🇸 美国</option><option value="JP">🇯🇵 日本</option><option value="KR">🇰🇷 韩国</option><option value="GB">🇬🇧 英国</option><option value="DE">🇩🇪 德国</option><option value="FR">🇫🇷 法国</option><option value="AU">🇦🇺 澳大利亚</option><option value="CA">🇨🇦 加拿大</option><option value="SG">🇸🇬 新加坡</option><option value="HK">🇭🇰 香港</option><option value="TW">🇹🇼 台湾</option><option value="IN">🇮🇳 印度</option><option value="BR">🇧🇷 巴西</option><option value="RU">🇷🇺 俄罗斯</option><option value="TH">🇹🇭 泰国</option><option value="VN">🇻🇳 越南</option><option value="MY">🇲🇾 马来西亚</option><option value="WORLD">🌍 世界平均</option>
       </select>
+      <div class="form-hint">用于获取该地区的平均预期寿命数据</div>
     </div>
     <button class="btn-reveal" onclick="reveal()">直面人生 · REVEAL</button>
   </div>
@@ -808,7 +810,11 @@ async function updateReport(id){
 
 async function loadReport(id){
   const {data,error}=await _sb.from(_TABLE).select('*').eq('id',id).single();
-  if(error||!data)return null;
+  if(error||!data){console.error('loadReport error:',error);return null}
+  // increment visit count
+  const newCount=(data.visit_count||0)+1;
+  _sb.from(_TABLE).update({visit_count:newCount}).eq('id',id)
+    .then(res=>{if(res.error)console.error('visit_count update error:',res.error)});
   return data;
 }
 
@@ -855,6 +861,8 @@ function stateToURL(){
   const compDefault=[Math.round(ageX())+25,78,2,3,6,0,3,18,3].join(',');
   if(compStr!==compDefault)p.set('comp',compStr);
   history.replaceState(null,'',location.pathname+'?'+p.toString()+(location.hash||''));
+  // sync to Supabase if we have a report
+  if(_reportId)updateReport(_reportId);
 }
 
 function loadFromURL(){
@@ -1146,11 +1154,11 @@ function reveal(){
   document.getElementById('resultScreen').classList.add('visible');
   document.getElementById('ticker').classList.add('visible');
   renderAll();startTicker();startClock();
-  // Supabase: create new or update existing report
-  if(_reportId){
-    updateReport(_reportId).then(()=>stateToURL());
-  }else{
+  // Supabase: create new report, then update URL (stateToURL will handle future updates)
+  if(!_reportId){
     createReport().then(()=>stateToURL());
+  }else{
+    stateToURL(); // triggers updateReport via stateToURL
   }
 }
 
