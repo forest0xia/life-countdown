@@ -2,10 +2,6 @@
 
 A visual life countdown timer that puts the passage of time into perspective through interactive visualizations.
 
-## Live Demo
-
-Open via GitHub Pages: `https://forest0xia.github.io/life-countdown/`
-
 ## Features
 
 - **Life progress bar** — real-time percentage of life elapsed with animated progress track
@@ -13,19 +9,30 @@ Open via GitHub Pages: `https://forest0xia.github.io/life-countdown/`
 - **Remaining time cards** — years, days, hours, free time, weekends, and meals left
 - **Time allocation breakdown** — shows how remaining years split across sleep, work, phone, chores, and truly free time
 - **Companion time calculator** — estimates remaining visits with parents (and optionally children), with adjustable parameters
-- **Time progress rings** — today / this week / this month / this year completion
-- **Motivational quotes** — rotating life perspective quotes
-- **Desk clock mode** — fullscreen multi-page clock with:
-  - Page 1: digital countdown clock with life bar and quotes
-  - Page 2: life matrix grid + progress ring charts (lazy-loaded on first swipe)
-  - Font picker (6 fonts) with auto-scaling
-  - Landscape optimization with rotation hint
-  - Screen wake lock to prevent sleep
+- **Desk clock mode** — fullscreen multi-page clock
 - **Customizable settings** — adjust expected lifespan, daily time allocation, companion parameters via modal dialogs
 - **Shareable reports** — each generated report gets a short unique URL (`?r=abc123`) stored in Supabase, shareable as read-only links
-- **Backwards-compatible URLs** — legacy `?b=&g=&c=` format still works
 - **Mobile-friendly** — responsive design with safe area support
-- **Performance optimized** — lazy-loaded desk clock pages, reduced animations, `prefers-reduced-motion` support, CSS containment
+
+## Live Demo
+
+Open via GitHub Pages: [https://forest0xia.github.io/life-countdown/](https://forest0xia.github.io/life-countdown/)
+
+## Screenshots
+
+### Desktop
+
+![Desktop view](docs/screenshot-pc.png)
+
+### Desk Clock
+
+![Desk clock view](docs/screenshot-clock.png)
+
+### Mobile (iPhone Pro)
+
+<p align="center">
+  <img src="docs/screenshot-mobile.png" alt="Mobile view" width="300">
+</p>
 
 ## Usage
 

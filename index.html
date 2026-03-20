@@ -1825,7 +1825,9 @@ function reveal(){
   // Always create a fresh report — clear any stale ID from previous session/shared link
   _reportId=null;
   try{sessionStorage.removeItem('lc_reportId')}catch(e){}
-  createReport().then(()=>stateToURL());
+  // Skip recording if all values are still defaults (year=1995, month=6, day=15, sex=male)
+  const _isDefault=birth.getFullYear()===1995&&birth.getMonth()===5&&birth.getDate()===15&&gender==='male';
+  if(_isDefault){stateToURL()}else{createReport().then(()=>stateToURL())}
 }
 
 function ageX(){return(Date.now()-birth.getTime())/(365.25*864e5)}
